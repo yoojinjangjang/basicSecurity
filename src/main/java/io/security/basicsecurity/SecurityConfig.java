@@ -5,12 +5,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -20,7 +22,8 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-
+    @Autowired
+    UserDetailsService userDetailsService;
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -52,5 +55,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 }) // logoutSuccessUrl과 동일 - 이동 페이지만 정의, 핸들러 --> 많은 로직 처리
                 .deleteCookies("remember-me") // remember-me 인증 시 해당 쿠키를 발급한다. --> 로그아웃 시 서버에서 만든 쿠키를 삭제하고 싶을 때 해당 이름의 쿠키가 삭제된다.
         ;
+
+        http
+                .rememberMe()
+                .rememberMeParameter("remember")
+                .tokenValiditySeconds(3600)
+                .userDetailsService(userDetailsService)//사용자 계정 조회 위한 클래스
+        ;
+
     }
 }
